@@ -64,7 +64,7 @@ public class Supplier {
 
         LocalPlayer player = mc.player;
 
-        // inventory
+        // inventory is open
         if (mc.screen != null) {
             updateCache(player);
             return;
@@ -72,13 +72,20 @@ public class Supplier {
 
         int currentSlot = player.getInventory().selected;
 
-        // slot changed
+        // hotbar slot changed
         if (currentSlot != lastSlot) {
             updateCache(player);
             return;
         }
 
         boolean isDropping = mc.options.keyDrop.isDown();
+        boolean isSwapping = mc.options.keySwapOffhand.isDown(); // Check for 'F' key
+
+        // swap key safety
+        if (isSwapping) {
+            updateCache(player);
+            return;
+        }
 
         // drop key safety
         if (!Demand.INSTANCE.supplyOnDrop.get() && isDropping) {
