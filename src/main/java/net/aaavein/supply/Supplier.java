@@ -191,7 +191,7 @@ public class Supplier {
 
                 lastSupplyTime = System.currentTimeMillis();
                 if (Demand.INSTANCE.playSound.get()) {
-                    Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.DECORATED_POT_INSERT, 1.0F, 1.0F));
+                    Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BUNDLE_INSERT, 1.0F, 0.5F));
                 }
 
                 return new SupplyResult(SupplyResult.Status.SUCCESS, foundStack);
