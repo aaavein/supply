@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:trident",
+    "minecraft:snowball",
+    "minecraft:egg",
+    "minecraft:experience_bottle",
+    "minecraft:fire_charge",
+    "minecraft:ender_eye",
+    "minecraft:lingering_potion",
+    "minecraft:ender_pearl"
+  ]
+}
