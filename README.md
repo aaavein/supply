@@ -1,7 +1,7 @@
 ### 📌 about
 **Supply** is a highly configurable client-side utility designed to keep your workflow uninterrupted. Whether you are building, farming, or fighting, this mod automatically supplies your hand the moment you run out.
 
-### 🛠️ what makes it special
+### 🛠️ features
 - **intelligent caching:** Tracks what was in your hand before it ran out, allowing the mod to make smart decisions about what to supply next.
 - **dual hand support:** Fully supports supplying items to both the Main Hand and Offhand.
 - **seamless swapping:** If the item is in the hotbar, it changes your selection; if it's in the inventory, it moves it to your hand.
@@ -12,3 +12,5 @@
 - **audio feedback:** Plays a subtle sound when a supply is successful, so you know you're locked and loaded.
 - **continuous building:** Optionally supplies any available block item when your current stack runs out, allowing you to keep placing blocks without interruption.
 - **in-game configuration:** Almost every behavior can be toggled via the config screen to fit your specific playstyle.
+
+##### Found a bug? Please open an issue on [GitHub](https://github.com/aaavein/supply/issues).
