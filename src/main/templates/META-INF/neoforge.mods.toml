@@ -12,6 +12,7 @@ displayURL = "https://github.com/aaavein/supply" #optional
 logoFile="icon.png" #optional
 authors = "${mod_authors}" #optional
 description = '''${mod_description}''' #mandatory
+modCategory = "utility"
 
 [[dependencies."${mod_id}"]] #optional
 modId = "neoforge" #mandatory
