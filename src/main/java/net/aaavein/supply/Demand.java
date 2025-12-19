@@ -7,7 +7,6 @@ public class Demand {
     public static final Demand INSTANCE;
     public static final ModConfigSpec SPEC;
 
-    // settings
     public final ModConfigSpec.BooleanValue playSound;
     public final ModConfigSpec.BooleanValue supplyOffhand;
     public final ModConfigSpec.BooleanValue supplyOnChange;
@@ -15,7 +14,6 @@ public class Demand {
     public final ModConfigSpec.BooleanValue supplyThrowables;
     public final ModConfigSpec.BooleanValue supplyLoyalty;
 
-    // rules
     public final ModConfigSpec.BooleanValue supplyCopies;
     public final ModConfigSpec.BooleanValue supplyItems;
     public final ModConfigSpec.BooleanValue supplyFood;

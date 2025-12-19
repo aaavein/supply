@@ -26,12 +26,10 @@ import java.util.function.Predicate;
 @EventBusSubscriber(modid = Supply.MODID, value = Dist.CLIENT)
 public class Supplier {
 
-    // supply:throwables
     private static final TagKey<Item> THROWABLE_TAG = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("supply", "throwables"));
 
     private static final List<Rule> RULES = new ArrayList<>();
 
-    // state tracking
     private static ItemStack lastMainHand = ItemStack.EMPTY;
     private static ItemStack lastOffHand = ItemStack.EMPTY;
     private static int lastSlot = -1;
@@ -39,15 +37,16 @@ public class Supplier {
     private static long lastSupplyTime = 0;
     private static final long COOLDOWN_MS = 100;
 
-    private static class SupplyResult {
-        enum Status { SUCCESS, FAILED_NO_MATCH, FAILED_COOLDOWN }
-        final Status status;
-        final ItemStack targetStack;
+    private static boolean wasSwapping = false;
+    private static long swapReleaseTime = 0;
+    private static final long SWAP_COOLDOWN_MS = 150;
 
-        SupplyResult(Status status, ItemStack targetStack) {
-            this.status = status;
-            this.targetStack = targetStack;
-        }
+    private static boolean wasPickingBlock = false;
+    private static long pickBlockReleaseTime = 0;
+    private static final long PICK_BLOCK_COOLDOWN_MS = 150;
+
+    private record SupplyResult(Status status, ItemStack targetStack) {
+            enum Status {SUCCESS, FAILED_NO_MATCH, FAILED_COOLDOWN}
     }
 
     static {
@@ -64,7 +63,6 @@ public class Supplier {
 
         LocalPlayer player = mc.player;
 
-        // inventory is open
         if (mc.screen != null) {
             updateCache(player);
             return;
@@ -72,28 +70,40 @@ public class Supplier {
 
         int currentSlot = player.getInventory().selected;
 
-        // hotbar slot changed
         if (currentSlot != lastSlot) {
             updateCache(player);
             return;
         }
 
         boolean isDropping = mc.options.keyDrop.isDown();
-        boolean isSwapping = mc.options.keySwapOffhand.isDown(); // Check for 'F' key
+        boolean isSwapping = mc.options.keySwapOffhand.isDown();
+        boolean isPickingBlock = mc.options.keyPickItem.isDown();
 
-        // swap key safety
-        if (isSwapping) {
+        if (wasSwapping && !isSwapping) {
+            swapReleaseTime = System.currentTimeMillis();
+        }
+        wasSwapping = isSwapping;
+
+        if (wasPickingBlock && !isPickingBlock) {
+            pickBlockReleaseTime = System.currentTimeMillis();
+        }
+        wasPickingBlock = isPickingBlock;
+
+        if (isSwapping || System.currentTimeMillis() - swapReleaseTime < SWAP_COOLDOWN_MS) {
             updateCache(player);
             return;
         }
 
-        // drop key safety
+        if (isPickingBlock || System.currentTimeMillis() - pickBlockReleaseTime < PICK_BLOCK_COOLDOWN_MS) {
+            updateCache(player);
+            return;
+        }
+
         if (!Demand.INSTANCE.supplyOnDrop.get() && isDropping) {
             updateCache(player);
             return;
         }
 
-        // using item
         if (player.isUsingItem()) {
             updateCache(player);
             return;
@@ -105,7 +115,6 @@ public class Supplier {
         boolean mainHandNeedsUpdate = true;
         boolean offHandNeedsUpdate = true;
 
-        // check main hand
         if (shouldSupply(player, lastMainHand, currentMain, isDropping)) {
             SupplyResult result = performSupply(player, InteractionHand.MAIN_HAND, lastMainHand);
 
@@ -117,7 +126,6 @@ public class Supplier {
             }
         }
 
-        // check offhand
         if (Demand.INSTANCE.supplyOffhand.get() && shouldSupply(player, lastOffHand, currentOff, isDropping)) {
             SupplyResult result = performSupply(player, InteractionHand.OFF_HAND, lastOffHand);
             if (result.status == SupplyResult.Status.SUCCESS) {
@@ -142,14 +150,12 @@ public class Supplier {
     private static boolean shouldSupply(LocalPlayer player, ItemStack oldStack, ItemStack newStack, boolean isDropping) {
         if (oldStack.isEmpty()) return false;
 
-        // throwable check
         if (!Demand.INSTANCE.supplyThrowables.get() && oldStack.is(THROWABLE_TAG)) {
             if (!isDropping) {
                 return false;
             }
         }
 
-        // loyalty check
         if (!Demand.INSTANCE.supplyLoyalty.get()) {
             var registry = player.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
             var loyalty = registry.getOrThrow(Enchantments.LOYALTY);
@@ -160,10 +166,8 @@ public class Supplier {
             }
         }
 
-        // item ran out
         if (newStack.isEmpty()) return true;
 
-        // item changed
         if (Demand.INSTANCE.supplyOnChange.get()) {
             return !ItemStack.isSameItem(oldStack, newStack);
         }
@@ -224,7 +228,6 @@ public class Supplier {
         return -1;
     }
 
-    // rules
     public abstract static class Rule {
         abstract boolean isActive();
         abstract boolean matches(LocalPlayer player, ItemStack oldStack);
