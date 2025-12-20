@@ -12,7 +12,6 @@ public class Supply {
 
     public Supply(ModContainer container) {
         container.registerConfig(ModConfig.Type.CLIENT, Demand.SPEC, "supply.toml");
-        container.registerConfig(ModConfig.Type.CLIENT, Demand.SPEC);
         container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
     }
 }
